@@ -1,14 +1,8 @@
 import React, { Component } from 'react';
-import CSV from 'csv-lite-js';
-import logo from './logo.svg';
-import './tailwind.output.css';
-import './App.css';
-import { CSVLink, CSVDownload } from "react-csv";
 
 // initialize with headers
 let text = "_H:	$Name	%Input[4:0,0,0,0]<4:6,2,3,4>	%Input[4:0,0,0,1]	%Input[4:0,0,0,2]	%Input[4:0,0,0,3]	%Input[4:0,0,1,0]	%Input[4:0,0,1,1]	%Input[4:0,0,1,2]	%Input[4:0,0,1,3]	%Input[4:0,0,2,0]	%Input[4:0,0,2,1]	%Input[4:0,0,2,2]	%Input[4:0,0,2,3]	%Input[4:0,1,0,0]	%Input[4:0,1,0,1]	%Input[4:0,1,0,2]	%Input[4:0,1,0,3]	%Input[4:0,1,1,0]	%Input[4:0,1,1,1]	%Input[4:0,1,1,2]	%Input[4:0,1,1,3]	%Input[4:0,1,2,0]	%Input[4:0,1,2,1]	%Input[4:0,1,2,2]	%Input[4:0,1,2,3]	%Input[4:1,0,0,0]	%Input[4:1,0,0,1]	%Input[4:1,0,0,2]	%Input[4:1,0,0,3]	%Input[4:1,0,1,0]	%Input[4:1,0,1,1]	%Input[4:1,0,1,2]	%Input[4:1,0,1,3]	%Input[4:1,0,2,0]	%Input[4:1,0,2,1]	%Input[4:1,0,2,2]	%Input[4:1,0,2,3]	%Input[4:1,1,0,0]	%Input[4:1,1,0,1]	%Input[4:1,1,0,2]	%Input[4:1,1,0,3]	%Input[4:1,1,1,0]	%Input[4:1,1,1,1]	%Input[4:1,1,1,2]	%Input[4:1,1,1,3]	%Input[4:1,1,2,0]	%Input[4:1,1,2,1]	%Input[4:1,1,2,2]	%Input[4:1,1,2,3]	%Input[4:2,0,0,0]	%Input[4:2,0,0,1]	%Input[4:2,0,0,2]	%Input[4:2,0,0,3]	%Input[4:2,0,1,0]	%Input[4:2,0,1,1]	%Input[4:2,0,1,2]	%Input[4:2,0,1,3]	%Input[4:2,0,2,0]	%Input[4:2,0,2,1]	%Input[4:2,0,2,2]	%Input[4:2,0,2,3]	%Input[4:2,1,0,0]	%Input[4:2,1,0,1]	%Input[4:2,1,0,2]	%Input[4:2,1,0,3]	%Input[4:2,1,1,0]	%Input[4:2,1,1,1]	%Input[4:2,1,1,2]	%Input[4:2,1,1,3]	%Input[4:2,1,2,0]	%Input[4:2,1,2,1]	%Input[4:2,1,2,2]	%Input[4:2,1,2,3]	%Input[4:3,0,0,0]	%Input[4:3,0,0,1]	%Input[4:3,0,0,2]	%Input[4:3,0,0,3]	%Input[4:3,0,1,0]	%Input[4:3,0,1,1]	%Input[4:3,0,1,2]	%Input[4:3,0,1,3]	%Input[4:3,0,2,0]	%Input[4:3,0,2,1]	%Input[4:3,0,2,2]	%Input[4:3,0,2,3]	%Input[4:3,1,0,0]	%Input[4:3,1,0,1]	%Input[4:3,1,0,2]	%Input[4:3,1,0,3]	%Input[4:3,1,1,0]	%Input[4:3,1,1,1]	%Input[4:3,1,1,2]	%Input[4:3,1,1,3]	%Input[4:3,1,2,0]	%Input[4:3,1,2,1]	%Input[4:3,1,2,2]	%Input[4:3,1,2,3]	%Input[4:4,0,0,0]	%Input[4:4,0,0,1]	%Input[4:4,0,0,2]	%Input[4:4,0,0,3]	%Input[4:4,0,1,0]	%Input[4:4,0,1,1]	%Input[4:4,0,1,2]	%Input[4:4,0,1,3]	%Input[4:4,0,2,0]	%Input[4:4,0,2,1]	%Input[4:4,0,2,2]	%Input[4:4,0,2,3]	%Input[4:4,1,0,0]	%Input[4:4,1,0,1]	%Input[4:4,1,0,2]	%Input[4:4,1,0,3]	%Input[4:4,1,1,0]	%Input[4:4,1,1,1]	%Input[4:4,1,1,2]	%Input[4:4,1,1,3]	%Input[4:4,1,2,0]	%Input[4:4,1,2,1]	%Input[4:4,1,2,2]	%Input[4:4,1,2,3]	%Input[4:5,0,0,0]	%Input[4:5,0,0,1]	%Input[4:5,0,0,2]	%Input[4:5,0,0,3]	%Input[4:5,0,1,0]	%Input[4:5,0,1,1]	%Input[4:5,0,1,2]	%Input[4:5,0,1,3]	%Input[4:5,0,2,0]	%Input[4:5,0,2,1]	%Input[4:5,0,2,2]	%Input[4:5,0,2,3]	%Input[4:5,1,0,0]	%Input[4:5,1,0,1]	%Input[4:5,1,0,2]	%Input[4:5,1,0,3]	%Input[4:5,1,1,0]	%Input[4:5,1,1,1]	%Input[4:5,1,1,2]	%Input[4:5,1,1,3]	%Input[4:5,1,2,0]	%Input[4:5,1,2,1]	%Input[4:5,1,2,2]	%Input[4:5,1,2,3]	%ECout[4:0,0,0,0]<4:6,2,3,4>	%ECout[4:0,0,0,1]	%ECout[4:0,0,0,2]	%ECout[4:0,0,0,3]	%ECout[4:0,0,1,0]	%ECout[4:0,0,1,1]	%ECout[4:0,0,1,2]	%ECout[4:0,0,1,3]	%ECout[4:0,0,2,0]	%ECout[4:0,0,2,1]	%ECout[4:0,0,2,2]	%ECout[4:0,0,2,3]	%ECout[4:0,1,0,0]	%ECout[4:0,1,0,1]	%ECout[4:0,1,0,2]	%ECout[4:0,1,0,3]	%ECout[4:0,1,1,0]	%ECout[4:0,1,1,1]	%ECout[4:0,1,1,2]	%ECout[4:0,1,1,3]	%ECout[4:0,1,2,0]	%ECout[4:0,1,2,1]	%ECout[4:0,1,2,2]	%ECout[4:0,1,2,3]	%ECout[4:1,0,0,0]	%ECout[4:1,0,0,1]	%ECout[4:1,0,0,2]	%ECout[4:1,0,0,3]	%ECout[4:1,0,1,0]	%ECout[4:1,0,1,1]	%ECout[4:1,0,1,2]	%ECout[4:1,0,1,3]	%ECout[4:1,0,2,0]	%ECout[4:1,0,2,1]	%ECout[4:1,0,2,2]	%ECout[4:1,0,2,3]	%ECout[4:1,1,0,0]	%ECout[4:1,1,0,1]	%ECout[4:1,1,0,2]	%ECout[4:1,1,0,3]	%ECout[4:1,1,1,0]	%ECout[4:1,1,1,1]	%ECout[4:1,1,1,2]	%ECout[4:1,1,1,3]	%ECout[4:1,1,2,0]	%ECout[4:1,1,2,1]	%ECout[4:1,1,2,2]	%ECout[4:1,1,2,3]	%ECout[4:2,0,0,0]	%ECout[4:2,0,0,1]	%ECout[4:2,0,0,2]	%ECout[4:2,0,0,3]	%ECout[4:2,0,1,0]	%ECout[4:2,0,1,1]	%ECout[4:2,0,1,2]	%ECout[4:2,0,1,3]	%ECout[4:2,0,2,0]	%ECout[4:2,0,2,1]	%ECout[4:2,0,2,2]	%ECout[4:2,0,2,3]	%ECout[4:2,1,0,0]	%ECout[4:2,1,0,1]	%ECout[4:2,1,0,2]	%ECout[4:2,1,0,3]	%ECout[4:2,1,1,0]	%ECout[4:2,1,1,1]	%ECout[4:2,1,1,2]	%ECout[4:2,1,1,3]	%ECout[4:2,1,2,0]	%ECout[4:2,1,2,1]	%ECout[4:2,1,2,2]	%ECout[4:2,1,2,3]	%ECout[4:3,0,0,0]	%ECout[4:3,0,0,1]	%ECout[4:3,0,0,2]	%ECout[4:3,0,0,3]	%ECout[4:3,0,1,0]	%ECout[4:3,0,1,1]	%ECout[4:3,0,1,2]	%ECout[4:3,0,1,3]	%ECout[4:3,0,2,0]	%ECout[4:3,0,2,1]	%ECout[4:3,0,2,2]	%ECout[4:3,0,2,3]	%ECout[4:3,1,0,0]	%ECout[4:3,1,0,1]	%ECout[4:3,1,0,2]	%ECout[4:3,1,0,3]	%ECout[4:3,1,1,0]	%ECout[4:3,1,1,1]	%ECout[4:3,1,1,2]	%ECout[4:3,1,1,3]	%ECout[4:3,1,2,0]	%ECout[4:3,1,2,1]	%ECout[4:3,1,2,2]	%ECout[4:3,1,2,3]	%ECout[4:4,0,0,0]	%ECout[4:4,0,0,1]	%ECout[4:4,0,0,2]	%ECout[4:4,0,0,3]	%ECout[4:4,0,1,0]	%ECout[4:4,0,1,1]	%ECout[4:4,0,1,2]	%ECout[4:4,0,1,3]	%ECout[4:4,0,2,0]	%ECout[4:4,0,2,1]	%ECout[4:4,0,2,2]	%ECout[4:4,0,2,3]	%ECout[4:4,1,0,0]	%ECout[4:4,1,0,1]	%ECout[4:4,1,0,2]	%ECout[4:4,1,0,3]	%ECout[4:4,1,1,0]	%ECout[4:4,1,1,1]	%ECout[4:4,1,1,2]	%ECout[4:4,1,1,3]	%ECout[4:4,1,2,0]	%ECout[4:4,1,2,1]	%ECout[4:4,1,2,2]	%ECout[4:4,1,2,3]	%ECout[4:5,0,0,0]	%ECout[4:5,0,0,1]	%ECout[4:5,0,0,2]	%ECout[4:5,0,0,3]	%ECout[4:5,0,1,0]	%ECout[4:5,0,1,1]	%ECout[4:5,0,1,2]	%ECout[4:5,0,1,3]	%ECout[4:5,0,2,0]	%ECout[4:5,0,2,1]	%ECout[4:5,0,2,2]	%ECout[4:5,0,2,3]	%ECout[4:5,1,0,0]	%ECout[4:5,1,0,1]	%ECout[4:5,1,0,2]	%ECout[4:5,1,0,3]	%ECout[4:5,1,1,0]	%ECout[4:5,1,1,1]	%ECout[4:5,1,1,2]	%ECout[4:5,1,1,3]	%ECout[4:5,1,2,0]	%ECout[4:5,1,2,1]	%ECout[4:5,1,2,2]	%ECout[4:5,1,2,3]"
 let dict = {}
-const separator = "\t"
 
 class StimBox extends Component {
   constructor(props) {
@@ -20,9 +14,7 @@ class StimBox extends Component {
   }
   toggleClass() {
     let coordString = this.props.coords.join('')
-    dict[coordString] = !!!this.state.active // t/f conversion or crazy good chess move?
-    console.log(dict)
-    console.log(this.props.coords)
+    dict[coordString] = !this.state.active
     const currentState = this.state.active;
     this.setState({ active: !currentState });
   };
@@ -109,10 +101,6 @@ class App extends Component {
     this.download = this.download.bind(this);
   }
   download() {
-    CSV.options.delimiter = "\t";
-    // text = CSV.stringify([[1,2,3],[4,5,6]])
-    console.log(text)
-
     // iterate through all nodes in order
     // [xi,j,k,l,m]
     // nested for loops are never the best solutions, but there aren't enough nodes to stress the system
@@ -132,13 +120,7 @@ class App extends Component {
               // columns
               for (let m = 0; m < 4; m++) {
                 let coordString = [h, i, j, k, l, m].join('')
-                if (dict[coordString]) {
-                  console.log("true")
-                  text = text + "\t1"
-                } else {
-                  console.log("false")
-                  text = text + "\t0"
-                }
+                text = text + (dict[coordString] ? "\t1" : "\t0")
               }
             }
           }
@@ -146,17 +128,12 @@ class App extends Component {
       }
     }
 
-    let a = CSV.parse(text);
-    console.log(a[0][0]);
-    console.log(a[1][5]);
-
     const element = document.createElement("a");
     const file = new Blob([text], { type: 'text/tab-separated-values' });
     element.href = URL.createObjectURL(file);
     element.download = "test_ab_ps.tsv";
     document.body.appendChild(element); // Required for this to work in FireFox
     element.click();
-    // console.log(text)
   };
 
   render() {
@@ -218,8 +195,8 @@ class App extends Component {
         {/* </div> */}
 
 
-        <button onClick={this.download} class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center">
-          <svg class="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z" /></svg>
+        <button onClick={this.download} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center">
+          <svg className="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z" /></svg>
           <span>Download</span>
         </button>
 
