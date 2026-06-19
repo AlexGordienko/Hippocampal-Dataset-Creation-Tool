@@ -4,6 +4,8 @@
 
 body {
   margin: 0;
+  background-color: #ffffff;
+  color: #111827; /* gray-900 */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -13,4 +15,16 @@ body {
 
 .App {
   text-align: center;
+}
+
+/* Hide number-input spin buttons so the value sits truly centered in the box. */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }

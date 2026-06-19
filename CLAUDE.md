@@ -11,32 +11,37 @@ A browser tool for hand-authoring TSV datasets consumed by the [Emergent](https:
 - `yarn dev` — Vite dev server with HMR on http://localhost:3000 (opens the browser; port set in `vite.config.js`).
 - `yarn build` — production build to `dist/`.
 - `yarn preview` — serve the built `dist/` bundle locally.
+- `yarn test` — run the Vitest suite once; `yarn test:watch` for watch mode. Run one file with `yarn test src/tsv.test.js`.
 
-There is no test suite. Stack: Vite + React 18 (class components) + Tailwind CSS 3. ESM throughout (`"type": "module"`), so all config files use `export default`.
+Stack: Vite + React 18 (class components) + Tailwind CSS 3, tested with Vitest. ESM throughout (`"type": "module"`), so all config files use `export default`.
 
 ## Tailwind note
 
 Tailwind runs through Vite's normal PostCSS pipeline (`postcss.config.js` → `tailwindcss` + `autoprefixer`). The `@tailwind` directives live at the top of `src/index.css`, which `src/main.jsx` imports. Utility scanning is driven by the `content` globs in `tailwind.config.js` — if a class only appears in markup that isn't matched there, it gets purged from the build. There is no separate CSS build step or generated CSS file anymore.
 
-## Architecture (all in src/App.jsx)
+## Architecture
 
-The entire app is `src/App.jsx` (entry point `src/main.jsx`). Understanding it hinges on two module-level globals and one coordinate scheme:
+Two files hold the logic: `src/App.jsx` (UI, React state) and `src/tsv.js` (pure TSV generation, no React/DOM — this is what the tests target). Entry point is `src/main.jsx`.
 
-- `dict` (global object) — the canonical state, NOT React state. Each toggled cell writes `dict[coordString] = true/false`. `StimBox.toggleClass` mutates `dict` directly; component state only drives the cell's color. So the grid's truth lives outside React.
-- `text` (global string) — holds the TSV header row, and `App.download()` appends data rows to it on export.
+### State and the grid hierarchy
+
+- `App.state.rows` is the list of pattern rows, each `{ name, active }` where `active` is a `{ cellKey: true }` map. One row = one Input/ECout pair = one `_D:` line on export. There is always at least one row. `StimBox` is **controlled**: colour comes from props, clicks call back up to `App.toggle(rowIndex, …)`. No global mutable state.
+- Row titles (`Row N`) are positional (derived from index). Default names are `rowName(i)` = `AB_${i}`. **Add** appends `AB_${len}`; **Delete** (shown only on rows after the first) removes a row, then re-sequences any *still-default* name to its new index — custom-edited names are left alone — and pops a 3s snackbar (`App.state.snackbar`). Fill/Clear/Random apply to **every** row.
+- Grid dimensions live in `App.state.dims` (`bigGroupRows/Cols`, `smallGroupRows/Cols`), edited via the four number inputs, shared across all rows. Defaults `6/2/3/4` reproduce the original fixed layout.
+- Component tree: per row `App` renders two `LRGroup`s (column 0=Input, 1=ECout) → each `LRGroup` lays out `bigGroupCols` side-by-side columns, each stacking `bigGroupRows` `StimGroup`s → each `StimGroup` renders a `smallGroupRows × smallGroupCols` grid of `StimBox`es. The `poolCol` prop flips justification to mirror the two pool columns toward the centre.
 
 ### Coordinate system
 
-Cells are identified by a 6-element coordinate `[chart, column, superCol, superRow, row, col]`, joined with `''` into a `dict` key (e.g. `[1,0,5,1,2,3]` → `"105123"`). All indices are single-digit, which is why the no-separator join works — keep it that way or keys will collide.
+A cell's **screen** coordinate is `[column, poolRow, poolCol, unitRow, unitCol]`, turned into a key by `cellKey()` which joins with **commas** (`'0,5,1,2,3'`). The comma matters: the original code joined with `''`, which silently collides once any index reaches 10 — exactly what configurable dimensions can produce.
 
-The component tree builds these coords top-down: `App` renders four `LRGroup`s (chart 0/1 × column 0=Input / 1=ECout) → each `LRGroup` lays out `StimGroup`s across superRow/superCol → each `StimGroup` renders a 3×4 grid of `StimBox`es. The `group` prop flips justification (left vs right) to mirror the two halves.
+### Export — `src/tsv.js`
 
-### Export ordering — the critical invariant
+`buildHeader`, `buildDataRow`, `buildTsv` (one row) and `buildTsvRows` (many) all derive columns from one ordered list (`tensorCells`), so the header and the data rows can never drift out of sync (the old code kept an 8 KB header literal duplicated in two places — that's gone). `App.download()` uses `buildTsvRows`.
 
-`App.download()` regenerates `text` from a hardcoded header literal, then walks nested loops `[h][i][j][k][l][m]` to emit a `1`/`0` per cell. **The loop traversal order must exactly match the column order in the header string**, or activations land in the wrong tensor cells. Note the loops count *down* on some axes (`j: 5→0`, `l: 2→0`) to match the header's column sequence — this is intentional, not a bug.
+- **Emergent format:** `_H:` header row, `_D:` data row(s), tab-separated. Column names like `%Input[4:a,b,c,d]<4:R,C,r,c>` encode tensor name, the index `[poolRow, poolCol, unitRow, unitCol]`, and (on each tensor's first column) the shape `<4:bigGroupRows,bigGroupCols,smallGroupRows,smallGroupCols>`. Two tensors per row, `Input` then `ECout`, always the same shape.
+- **The vertical flip (critical, intentional):** the two vertical axes (`poolRow`, `unitRow`) are flipped between screen-space (y-down) and tensor-space (y-up). `buildDataRow` looks up screen cell `[bigGroupRows-1-a, b, smallGroupRows-1-c, d]` for tensor index `[a,b,c,d]`. This reproduces the original tool's descending `j:5→0` / `l:2→0` loops; drop it and saved patterns export upside-down.
+- One `_D:` line is emitted per row in `App.state.rows` (in order), each tagged with that row's `name`. Output filename is hardcoded to `test_ab_ps.tsv`.
 
-### TSV format gotchas
+### Tests (`src/tsv.test.js`)
 
-- The header literal appears **twice** (module top + inside `download()`); they must stay identical.
-- Emergent format: first row is `_H:` (header), data rows start with `_D:`, everything tab-separated. Column names like `%Input[4:0,0,0,0]<4:6,2,3,4>` encode the tensor name, index, and (on the first column of each tensor) its `<shape>`. Two tensors are emitted: `Input` and `ECout`, each shape `4:6,2,3,4`.
-- Output filename is hardcoded to `test_ab_ps.tsv`.
+Regression-locks the export to the original behaviour: `buildHeader(DEFAULT_DIMS)` is compared byte-for-byte against `src/__fixtures__/legacyHeader.txt` (extracted verbatim from the pre-refactor code), and `buildDataRow` is diffed against a faithful copy of the original `download()` loop across several activation patterns. Also covers dimension-driven column counts and the multi-digit key-collision fix. **If you change export logic, these must still pass** — they are the guarantee that output stays compatible.
